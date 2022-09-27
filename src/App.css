@@ -1,0 +1,17 @@
+.rct-node{
+ border-bottom: 1px solid #D1D1D1;
+ margin-top: 1rem;
+ padding-bottom: 1rem;
+}
+
+.rct-title{
+ font-size: 18px;
+}
+
+.rct-checkbox svg {
+  width: 25px;
+}
+
+.selectcont .css-1s2u09g-control{
+  border-radius: 20px !important;
+}
