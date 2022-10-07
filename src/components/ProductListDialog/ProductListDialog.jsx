@@ -1,10 +1,10 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import cross from '../../assets/cross.svg'
 import searchicon from '../../assets/search.svg'
 import ProductList from './ProductList/ProductList'
 
-const ProductListDialog = ({setOpen,handleAddProduct,checked, setChecked, setAddedProducts, products, setProducts}) => {
+const ProductListDialog = ({setOpen,handleAddProduct,checked,page,setPage, setChecked, setAddedProducts, products, setProducts}) => {
   
   
   const [searchedProducts, setSearchedProducts] = useState([]);
@@ -16,9 +16,30 @@ const ProductListDialog = ({setOpen,handleAddProduct,checked, setChecked, setAdd
   //search a string in products and return the products that contain the string
   const searchHandler = (e)=>{
     setSearch(e.target.value)
-    const searchedProducts = products.filter(product=>product.title.toLowerCase().includes(e.target.value.toLowerCase()))
-    setSearchedProducts(searchedProducts)
+    // const searchedProducts = products.filter(product=>product.title.toLowerCase().includes(e.target.value.toLowerCase()))
+    // setSearchedProducts(searchedProducts)
   }
+
+  useEffect(()=>{
+    (async function() {
+     if(search!=''){
+      const {data} = await axios.get(`https://stageapibc.monkcommerce.app/admin/shop/product?search=${search}&page=${page}`)
+      if(data==null){
+        setProducts([])
+      }
+      else{
+        setProducts(data)
+      }
+     }else{
+      const {data} = await axios.get(`https://stageapibc.monkcommerce.app/admin/shop/product?page=1`)
+  
+        setProducts(data)
+   
+     }
+    }
+    )();
+    
+  },[search])
 
   React.useEffect(()=>{
     console.log(products)
@@ -38,7 +59,7 @@ const ProductListDialog = ({setOpen,handleAddProduct,checked, setChecked, setAdd
               <img src={searchicon} className='absolute left-[3rem]'/>
               <input value={search} onChange={searchHandler} placeholder='Search Products' className='w-[90%] pl-[3rem] border border-[#cccccc]'/>
           </div>
-          <ProductList checked={checked} setChecked={setChecked} products={searchedProducts} setProducts={setProducts}/>
+          <ProductList page={page} setPage={setPage} checked={checked} setChecked={setChecked} products={searchedProducts} setProducts={setProducts}/>
           <div className='h-[3rem] flex items-center justify-between border-t border-[##D1D1D1]'>
               <p className='ml-[1rem] font-medium text-black text-[16px]'>{
                 checked.length>0?checked.length+' products Selected':'No Product Selected'

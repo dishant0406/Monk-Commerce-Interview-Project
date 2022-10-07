@@ -1,5 +1,5 @@
 import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ProductListDialog from '../ProductListDialog/ProductListDialog'
 import Select from 'react-select';
 import { MdDragIndicator, MdOutlineClose } from 'react-icons/md';
@@ -194,6 +194,7 @@ const ProductPicker = () => {
   const [checked, setChecked] = useState([]);
   const [clickedId, setClickedId] = useState(null)
   const [clickedIndex, setClickedIndex] = useState(null)
+  const [page, setPage] = useState(1);
 
   const onDragEnd = (result) => {
     const newItems = Array.from(addedProcessedArray);
@@ -206,40 +207,45 @@ const ProductPicker = () => {
     if(addedProducts.length==0){
       setAddedProducts(checked);
       setOpen(false)
-      setChecked([])
     }else{
       // remove all elements from addedProducts that same string as the clickedId
 
       if(checked.length>0){
-        const filtered = addedProducts.filter(function(value, index, arr){ 
-          if(value.includes(`${clickedId}`)){
-            setClickedIndex(index)
-          }
-          return !value.includes(`${clickedId}`);
-        });
-        const arr = []
-        productIdArray.forEach((prod, i)=>{
-          if(prod==clickedId){
-            setClickedIndex(i)
-          }
-        })
-        for(let i=0;i<=filtered.length;i++){
-          for(let i=0;i<filtered.length;i++){
-            if(i==clickedIndex){
-              for(let i =0;i<checked.length;i++){
-                arr.push(checked[i])
+        if(clickedId){
+          const filtered = addedProducts.filter(function(value, index, arr){ 
+            if(value.includes(`${clickedId}`)){
+              setClickedIndex(index)
+            }
+            return !value.includes(`${clickedId}`);
+          });
+          const arr = []
+          productIdArray.forEach((prod, i)=>{
+            if(prod==clickedId){
+              setClickedIndex(i)
+            }
+          })
+          for(let i=0;i<=filtered.length;i++){
+            for(let i=0;i<filtered.length;i++){
+              if(i==clickedIndex){
+                for(let i =0;i<checked.length;i++){
+                  arr.push(checked[i])
+                }
               }
+              arr.push(filtered[i])
             }
             arr.push(filtered[i])
           }
-          arr.push(filtered[i])
+          setAddedProducts([...filtered, ...checked]);
+          setClickedId(null)
+        }else{
+          setAddedProducts([...addedProducts, ...checked]);
         }
-        setAddedProducts([...filtered, ...checked]);
-        setChecked([])
       }
       setOpen(false)
     }
   }
+
+
 
   //delete a product from the array
   const deleteProduct = (id)=>{
@@ -262,6 +268,7 @@ const ProductPicker = () => {
       setVariantIdArray(varr)
     })
   }, [addedProducts])
+
 
   useEffect(() => {
     let processedProucts = []
@@ -287,7 +294,7 @@ const ProductPicker = () => {
   React.useEffect(() => {
 
     (async function() {
-      const {data} = await axios.get('https://stageapibc.monkcommerce.app/admin/shop/product')
+      const {data} = await axios.get(`https://stageapibc.monkcommerce.app/admin/shop/product?page=1`)
       setProducts(data)
   
     })();
@@ -302,13 +309,12 @@ const ProductPicker = () => {
     setDiscount(20)
     setSelectedOption({ value: 'Percentage', label: '% off' })
     setAdditionalProducts([1])
-
   }
 
   return (
     <div className='w-full'>
       {open && <div>
-      <ProductListDialog checked={checked} setChecked={setChecked} handleAddProduct={addTheProducts} products={products} setProducts={setProducts} setOpen={setOpen} setAddedProducts={setAddedProducts}/>
+      <ProductListDialog page={page} setPage={setPage} checked={checked} setChecked={setChecked} handleAddProduct={addTheProducts} products={products} setProducts={setProducts} setOpen={setOpen} setAddedProducts={setAddedProducts}/>
       </div>}
         <div  className='justify-center font-medium mt-[4rem] flex w-full'>
           <div>
